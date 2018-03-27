@@ -61,8 +61,8 @@ ExternalProject_Add(
     URL "http://netcologne.dl.sourceforge.net/project/boost/boost/1.62.0/boost_1_62_0.tar.gz"
     URL_MD5 "6f4571e7c5a66ccc3323da6c24be8f05"
     CONFIGURE_COMMAND ${boost_PREFIX}/src/boost/bootstrap.sh --with-libraries=serialization,filesystem,system,program_options,iostreams --prefix=${boost_PREFIX}
-    BUILD_COMMAND ./bjam link=static cxxflags='-fPIC'
-    INSTALL_COMMAND ./bjam link=static install
+    BUILD_COMMAND ./bjam --ignore-site-config link=static cxxflags='-fPIC'
+    INSTALL_COMMAND ./bjam --ignore-site-config link=static install
     BUILD_IN_SOURCE 1
     LOG_UPDATE ON
     LOG_CONFIGURE ON
