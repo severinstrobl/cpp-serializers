@@ -1,0 +1,9 @@
+package lcm_test;
+
+struct Record {
+    int32_t nIds;
+    int64_t ids[nIds];
+
+    int32_t nStrings;
+    string strings[nStrings];
+}

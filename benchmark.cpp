@@ -19,6 +19,8 @@
 #include <capnp/message.h>
 #include <capnp/serialize.h>
 
+#include <lcm/lcm-cpp.hpp>
+
 #include "protobuf/test.pb.h"
 #include "capnproto/test.capnp.h"
 #include "boost/record.hpp"
@@ -27,6 +29,7 @@
 #include "avro/record.hpp"
 #include "flatbuffers/test_generated.h"
 #include "yas/record.hpp"
+#include "lcm/lcm_test/Record.hpp"
 
 #include "data.hpp"
 
@@ -518,6 +521,54 @@ yas_serialization_test(size_t iterations)
     }
 }
 
+void
+lcm_serialization_test(size_t iterations)
+{
+    using namespace lcm_test;
+
+    Record r1;
+
+    r1.ids.reserve(kIntegers.size());
+    r1.nIds = kIntegers.size();
+    for (size_t i = 0; i < kIntegers.size(); i++) {
+        r1.ids.push_back(kIntegers[i]);
+    }
+
+    r1.strings.reserve(kStringsCount);
+    r1.nStrings = kStringsCount;
+    for (size_t i = 0; i < kStringsCount; i++) {
+        r1.strings.push_back(kStringValue);
+    }
+
+    std::vector<uint8_t> buffer(r1.getEncodedSize());
+    if (r1.encode(buffer.data(), 0, buffer.size()) != r1.getEncodedSize()) {
+        throw std::logic_error("lcm's case: serialization failed");
+    }
+
+    // check if we can deserialize back
+    Record r2;
+    int ok = r2.decode(buffer.data(), 0, buffer.size());
+    if (ok < 0) {
+        throw std::logic_error("lcm's case: deserialization failed");
+    }
+
+    std::cout << "lcm: version = " << LCM_MAJOR_VERSION << "." <<
+        LCM_MINOR_VERSION << "." << LCM_MICRO_VERSION << std::endl;
+
+    std::cout << "lcm: size = " << buffer.size() << " bytes" << std::endl;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < iterations; i++) {
+        r1.encode(buffer.data(), 0, buffer.size());
+        r2.decode(buffer.data(), 0, buffer.size());
+    }
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
+
+    std::cout << "lcm: time = " << duration << " milliseconds" << std::endl << std::endl;
+}
+
+
 int
 main(int argc, char** argv)
 {
@@ -597,6 +648,10 @@ main(int argc, char** argv)
 
         if (names.empty() || names.find("yas-compact") != names.end()) {
             yas_serialization_test<yas::binary | yas::no_header | yas::compacted>(iterations);
+        }
+
+        if (names.empty() || names.find("lcm") != names.end()) {
+            lcm_serialization_test(iterations);
         }
     } catch (std::exception& exc) {
         std::cerr << "Error: " << exc.what() << std::endl;

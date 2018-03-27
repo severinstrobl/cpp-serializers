@@ -204,6 +204,24 @@ ExternalProject_Add(
 )
 include_directories(${yas_PREFIX}/include)
 
+set(lcm_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/external/lcm)
+ExternalProject_Add(
+    lcm
+    PREFIX ${lcm_PREFIX}
+    URL "https://github.com/lcm-proj/lcm/archive/v1.3.1.tar.gz"
+    URL_MD5 "a63526585e517d5a37a69880594c73ac"
+    CONFIGURE_COMMAND ${lcm_PREFIX}/src/lcm/bootstrap.sh COMMAND CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} ${lcm_PREFIX}/src/lcm/configure --prefix=${lcm_PREFIX} --libdir=${lcm_PREFIX}/lib --enable-shared=no --without-python --without-java --without-lua
+    BUILD_COMMAND $(MAKE)
+    INSTALL_COMMAND $(MAKE) install
+    BUILD_IN_SOURCE 1
+    LOG_UPDATE ON
+    LOG_BUILD ON
+    LOG_INSTALL ON
+)
+include_directories(${lcm_PREFIX}/include)
+set(LCM_LIBRARIES ${lcm_PREFIX}/lib/liblcm.a)
+set(LCM_GENERATOR ${lcm_PREFIX}/bin/lcm-gen)
+
 set(LINKLIBS
     ${THRIFT_LIBRARIES}
     ${MSGPACK_LIBRARIES}
@@ -212,6 +230,7 @@ set(LINKLIBS
     ${BOOST_LIBRARIES}
     ${AVRO_LIBRARIES}
     ${FLATBUFFERS_LIBRARIES}
+    ${LCM_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${ZLIB_LIBRARIES}
 )
@@ -289,6 +308,19 @@ set_source_files_properties(
 )
 set(FLATBUFFERS_SERIALIZATION_SOURCES ${cpp_serializers_SOURCE_DIR}/flatbuffers/test_generated.h)
 
+add_custom_command(
+    DEPENDS ${cpp_serializers_SOURCE_DIR}/test.lcm
+    COMMAND ${LCM_GENERATOR}
+    ARGS --cpp --cpp-std c++11 --cpp-hpath ${cpp_serializers_SOURCE_DIR}/lcm ${cpp_serializers_SOURCE_DIR}/test.lcm
+    OUTPUT  "${cpp_serializers_SOURCE_DIR}/lcm/lcm_test/Record.hpp"
+    COMMENT "Executing LCM compiler"
+)
+set_source_files_properties(
+    ${cpp_serializers_SOURCE_DIR}/lcm/lcm_test/Record.hpp
+    PROPERTIES GENERATED TRUE
+)
+set(LCM_SERIALIZATION_SOURCES  ${cpp_serializers_SOURCE_DIR}/lcm/lcm_test/Record.hpp)
+
 set(BOOST_SERIALIZATION_SOURCES ${cpp_serializers_SOURCE_DIR}/boost/record.cpp)
 set(CEREAL_SERIALIZATION_SOURCES ${cpp_serializers_SOURCE_DIR}/cereal/record.cpp)
 set(YAS_SERIALIZATION_SOURCES ${cpp_serializers_SOURCE_DIR}/yas/record.cpp)
@@ -304,7 +336,8 @@ add_executable(
     ${AVRO_SERIALIZATION_SOURCES}
     ${FLATBUFFERS_SERIALIZATION_SOURCES}
     ${YAS_SERIALIZATION_SOURCES}
+    ${LCM_SERIALIZATION_SOURCES}
 )
-add_dependencies(benchmark thrift msgpack protobuf capnproto boost cereal avro flatbuffers yas)
+add_dependencies(benchmark thrift msgpack protobuf capnproto boost cereal avro flatbuffers yas lcm)
 target_link_libraries(benchmark ${LINKLIBS})
 set_target_properties(benchmark PROPERTIES COMPILE_FLAGS "-std=c++11")

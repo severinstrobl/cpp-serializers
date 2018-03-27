@@ -11,6 +11,7 @@ Compare various data serialization libraries for C++.
 * [Capnproto](https://capnproto.org/)
 * [Flatbuffers](https://google.github.io/flatbuffers/)
 * [YAS](https://github.com/niXman/yas)
+* [LCM](https://github.com/lcm-proj/lcm)
 
 #### Build
 This project does not have any external library dependencies. All (boost, thrift etc.) needed libraries are downloaded
