@@ -112,8 +112,8 @@ set(protobuf_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/external/protobuf)
 ExternalProject_Add(
     protobuf
     PREFIX ${protobuf_PREFIX}
-    URL "https://github.com/google/protobuf/releases/download/v3.1.0/protobuf-cpp-3.1.0.tar.gz"
-    URL_MD5 "bd5e3eed635a8d32e2b99658633815ef"
+    URL "https://github.com/google/protobuf/releases/download/v3.5.1/protobuf-cpp-3.5.1.tar.gz"
+    URL_MD5 "ca0d9b243e649d398a6b419acd35103a"
     CONFIGURE_COMMAND CXX=${CMAKE_CXX_COMPILER} CC=${CMAKE_C_COMPILER} ${protobuf_PREFIX}/src/protobuf/configure --prefix=${protobuf_PREFIX} --libdir=${protobuf_PREFIX}/lib --enable-shared=no
     BUILD_COMMAND $(MAKE)
     INSTALL_COMMAND $(MAKE) install
