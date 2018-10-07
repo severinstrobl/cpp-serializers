@@ -9,6 +9,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <thrift/stdcxx.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/protocol/TCompactProtocol.h>
@@ -44,10 +45,11 @@ thrift_serialization_test(size_t iterations, ThriftSerializationProto proto = Th
     using apache::thrift::protocol::TBinaryProtocolT;
     using apache::thrift::protocol::TCompactProtocolT;
 
+    using namespace apache::thrift;
     using namespace thrift_test;
 
-    boost::shared_ptr<TMemoryBuffer> buffer1(new TMemoryBuffer());
-    boost::shared_ptr<TMemoryBuffer> buffer2(new TMemoryBuffer());
+    stdcxx::shared_ptr<TMemoryBuffer> buffer1(new TMemoryBuffer());
+    stdcxx::shared_ptr<TMemoryBuffer> buffer2(new TMemoryBuffer());
 
     TBinaryProtocolT<TMemoryBuffer> binary_protocol1(buffer1);
     TBinaryProtocolT<TMemoryBuffer> binary_protocol2(buffer2);
@@ -98,7 +100,7 @@ thrift_serialization_test(size_t iterations, ThriftSerializationProto proto = Th
         tag = "thrift-compact:";
     }
 
-    std::cout << tag << " version = " << VERSION << std::endl;
+    std::cout << tag << " version = " << PACKAGE_VERSION << std::endl;
     std::cout << tag << " size = " << serialized.size() << " bytes" << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
