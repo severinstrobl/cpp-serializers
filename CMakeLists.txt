@@ -10,6 +10,7 @@ include(CheckTypeSize)
 include(CheckIncludeFiles)
 include(CheckCXXCompilerFlag)
 include(ExternalProject)
+include(GNUInstallDirs)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -197,7 +198,7 @@ ExternalProject_Add(
     LOG_BUILD ON
 )
 include_directories(${flatbuffers_PREFIX}/include)
-set(FLATBUFFERS_LIBRARIES ${flatbuffers_PREFIX}/lib/libflatbuffers.a)
+set(FLATBUFFERS_LIBRARIES ${flatbuffers_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libflatbuffers.a)
 set(FLATBUFFERS_GENERATOR ${flatbuffers_PREFIX}/bin/flatc)
 
 set(yas_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/external/yas)
